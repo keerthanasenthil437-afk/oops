@@ -2,41 +2,43 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class Quiz{
+public class Quiz {
 
     static int timeleft = 30;
     static int curqn = 0;
     static int score = 0;
 
     static String[] qn = {
-        "1. What is Java?",
-        "2. What is C?",
-        "3. What is Python?",
-        "4. What is JavaScript?",
-        "5. What is C++?"
+        "1. What is the capital of India?",
+        "2. Which language is used for Android development?",
+        "3. Who invented Java?",
+        "4. What does CPU stand for?",
+        "5. Which is not a programming language?"
     };
 
     static String opn[][] = {
-        {"a) Language", "b) Pen", "c) Pencil", "d) Chair"},
-        {"a) Apple", "b) Ball", "c) Language", "d) Dog"},
-        {"a) Keerthana", "b) Language", "c) Sahhana", "d) Rubiga"},
-        {"a) Write", "b) Read", "c) Append", "d) Language"},
-        {"a) Language", "b) abc", "c) def", "d) ghi"}
+        {"a) Delhi", "b) Mumbai", "c) Chennai", "d) Kolkata"},
+        {"a) Python", "b) Java", "c) C", "d) HTML"},
+        {"a) Dennis Ritchie", "b) James Gosling", "c) Bjarne Stroustrup", "d) Elon Musk"},
+        {"a) Central Process Unit", "b) Central Processing Unit", "c) Computer Personal Unit", "d) Central Processor Utility"},
+        {"a) Java", "b) Python", "c) HTML", "d) C++"}
     };
 
     static String[] ans = {
-        "a) Language",
-        "c) Language",
-        "b) Language",
-        "d) Language",
-        "a) Language"
+        "a) Delhi",
+        "b) Java",
+        "b) James Gosling",
+        "b) Central Processing Unit",
+        "c) HTML"
     };
 
     static Thread timerThread;
-    static JButton next;   // 👈 global button
+    static JButton next;
 
     // ✅ CHECK ANSWER
-    static void checkAnswer(JRadioButton r1, JRadioButton r2, JRadioButton r3, JRadioButton r4, int qn) {
+    static boolean checkAnswer(JRadioButton r1, JRadioButton r2,
+                               JRadioButton r3, JRadioButton r4, int qn) {
+
         String selected = "";
 
         if (r1.isSelected()) selected = r1.getText();
@@ -46,7 +48,9 @@ public class Quiz{
 
         if (selected.equals(ans[qn])) {
             score++;
+            return true;
         }
+        return false;
     }
 
     public static void main(String args[]) {
@@ -65,23 +69,42 @@ public class Quiz{
 
         next = new JButton("Next ->");
 
-        // ✅ BUTTON ACTION
+        // ✅ BUTTON ACTION WITH COLOR FEEDBACK
         next.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                checkAnswer(r1, r2, r3, r4, curqn - 1); // FIXED index
+
                 stopTimer();
-                Nextqn(l, r1, r2, r3, r4, b, tl);
+
+                boolean isCorrect = checkAnswer(r1, r2, r3, r4, curqn - 1);
+
+                // 🎨 Color feedback
+                if (isCorrect) {
+                    f.getContentPane().setBackground(Color.GREEN);
+                } else {
+                    f.getContentPane().setBackground(Color.RED);
+                }
+
+                // ⏳ Delay then next question
+                Timer delay = new Timer(1000, new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        f.getContentPane().setBackground(null);
+                        Nextqn(l, r1, r2, r3, r4, b, tl);
+                    }
+                });
+
+                delay.setRepeats(false);
+                delay.start();
             }
         });
 
         // UI SETUP
-        l.setBounds(30, 30, 400, 30);
+        l.setBounds(30, 30, 450, 30);
         tl.setBounds(300, 10, 150, 30);
 
-        r1.setBounds(40, 80, 200, 30);
-        r2.setBounds(40, 120, 200, 30);
-        r3.setBounds(40, 160, 200, 30);
-        r4.setBounds(40, 200, 200, 30);
+        r1.setBounds(40, 80, 300, 30);
+        r2.setBounds(40, 120, 300, 30);
+        r3.setBounds(40, 160, 300, 30);
+        r4.setBounds(40, 200, 300, 30);
 
         next.setBounds(200, 260, 120, 30);
 
@@ -130,7 +153,6 @@ public class Quiz{
             startTimer(tl, qlabel, r1, r2, r3, r4, b);
         }
         else {
-            // ✅ FINAL RESULT
             stopTimer();
 
             qlabel.setText("QUIZ FINISHED!!! Your Score: " + score + "/" + qn.length);
@@ -144,7 +166,6 @@ public class Quiz{
 
             next.setEnabled(false);
 
-            // ✅ POPUP RESULT
             JOptionPane.showMessageDialog(null,
                     "QUIZ FINISHED!\nYour Score: " + score + "/" + qn.length);
         }
@@ -177,12 +198,29 @@ public class Quiz{
                     });
                 }
 
-                // ⏰ TIME UP AUTO NEXT
+                // ⏰ TIME UP
                 SwingUtilities.invokeLater(new Runnable() {
                     public void run() {
+
                         tl.setText("Time's up!");
 
-                        Nextqn(qlabel, r1, r2, r3, r4, b, tl);
+                        boolean isCorrect = checkAnswer(r1, r2, r3, r4, curqn - 1);
+
+                        if (isCorrect) {
+                            qlabel.setForeground(Color.GREEN);
+                        } else {
+                            qlabel.setForeground(Color.RED);
+                        }
+
+                        Timer delay = new Timer(1000, new ActionListener() {
+                            public void actionPerformed(ActionEvent e) {
+                                qlabel.setForeground(Color.BLACK);
+                                Nextqn(qlabel, r1, r2, r3, r4, b, tl);
+                            }
+                        });
+
+                        delay.setRepeats(false);
+                        delay.start();
                     }
                 });
             }
